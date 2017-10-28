@@ -1,0 +1,26 @@
+Blindness start: 0:00
+Ghost appears + Slowness: 1:04  -> 1:05
+Phase 1 stop blindness: 1:06 -> 1:22 (16 secs, short & intense fight period)
+Moving player around randomly: 1:22 -> 1:28
+Blocks diseapear around it: 1:35 -> 1:40
+Reblindess + Slowness + Ghost appear: 1:40 -> 1:43
+Phase 2: 1:43 -> 2:16 (31 secs, intense more long fight period)
+Phase 3: 2:17 -> 2:31 (14 secs more calm period)
+Reblindess + Slowness + Ghost appear: 2:32 -> 2:33
+Phase 4: 2:34 -> 2:48 (12 secs, intense period)
+Moving player around randomly: 2:49 -> 2:56
+Blocks diseapear around it: 2:56 -> 3:03
+Phase 5: 3:04 -> 3:17 (13 secs, get higher period)
+Reblindess + Slowness + Ghost appear: 3:17 -> 3:18
+Phase 6: 3:19 -> 3:47 (28 secs, intense period)
+Phase 7: 3:47 -> 4:22 (35 secs, more calm period)
+
+If killed before the end, gets reward, otherwise, nothing happends.
+
+Reward: Hat of despair:
+Pumpkin: 
+- Night vision, 
+- when sneak, diseapears (!== invisibility, he cannot be seen nor hit), 
+- if he sneaks more than 12 seconds, having nausea
+- If he strikes someone while being invisible, he'll loose invisility
+- if he strikes someone otherwise, the person will get a big creepy sound
