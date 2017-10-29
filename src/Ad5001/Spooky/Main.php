@@ -5,7 +5,10 @@ use pocketmine\command\Command;
 use pocketmine\plugin\PluginBase;
 use pocketmine\Server;
 use pocketmine\Player;
+use pocketmine\event\Listener;
 use pocketmine\item\enchantment\Enchantment;
+use pocketmine\event\block\BlockPlaceEvent;
+use pocketmine\block\Block;
 
 use pocketmine\nbt\tag\ListTag;
 use pocketmine\nbt\tag\CompoundTag;
@@ -18,7 +21,7 @@ use Ad5001\Spooky\entity\Ghost;
 use Ad5001\Spooky\tasks\TickTask;
 
 
-class Main extends PluginBase{
+class Main extends PluginBase implements Listener{
 
     public $ghosts = [];
 
@@ -29,8 +32,9 @@ class Main extends PluginBase{
      */
     public function onEnable(){
         // Registering some enchants
-        Enchantement::registerEnchantment(new Enchantement(Enchantement::SHARPNESS, "%enchantment.attack.sharpness", Enchantement::RARITY_COMMON, Enchantement::SLOT_SWORD));
-        // $this->getServer()->getScheduler()->scheduler<Delayed or Repeating>Task(new Task1($this), <TIME>);
+        Enchantment::registerEnchantment(new Enchantment(Enchantment::SHARPNESS, "%enchantment.attack.sharpness", Enchantment::ACTIVATION_HELD, Enchantment::RARITY_COMMON, Enchantment::SLOT_SWORD));
+        $this->getServer()->getScheduler()->scheduleRepeatingTask(new TickTask($this), 2);
+        $this->getServer()->getPluginManager()->registerEvents($this, $this);
     }
 
     /**
@@ -51,7 +55,57 @@ class Main extends PluginBase{
     }
 
 
+    public function onBlockPlace(BlockPlaceEvent $event) {
+        // Checking the pumpkin at the top
+        $found = false;
+        if($event->getBlock()->getId() == Block::PUMPKIN){
+            $under = $event->getBlock()->asVector3();
+            $under->y--;
+            // Hay bale for the body
+            if($event->getBlock()->getLevel()->getBlock($under)->getId() == Block::HAY_BALE) {
+                $under2 = $event->getBlock()->asVector3();
+                $under2->y--;
+                // Fence for the bottom
+                if($event->getBlock()->getLevel()->getBlock($under2)->getId() == Block::FENCE){
+                    // Fences for the sides.
+                    $side1 = $under->asVector3();
+                    $side1->x++;
+                    $side2 = $under->asVector3();
+                    $side2->x--;
+                    if($event->getBlock()->getLevel()->getBlock($side1)->getId() == Block::FENCE && $event->getBlock()->getLevel()->getBlock($side1)->getId() == Block::FENCE) {
+                        $found = true;
+                    } else {
+                        $side1 = $under->asVector3();
+                        $side1->z++;
+                        $side2 = $under->asVector3();
+                        $side2->z--;
+                        if($event->getBlock()->getLevel()->getBlock($side1)->getId() == Block::FENCE && $event->getBlock()->getLevel()->getBlock($side1)->getId() == Block::FENCE) {
+                            $found = true;
+                        }
+                    }
+                }
+            }
+        }
+        // If everything's right, we can destroy the structure & generate the ghost
+        if($found){
+            $event->setCancelled();
+            $event->getBlock()->getLevel()->setBlock($under, Block::get(Block::AIR));
+            $event->getBlock()->getLevel()->setBlock($under2, Block::get(Block::AIR));
+            $event->getBlock()->getLevel()->setBlock($side1, Block::get(Block::AIR));
+            $event->getBlock()->getLevel()->setBlock($side2, Block::get(Block::AIR));
+            if($event->getPlayer()){
+                $this->spawnGhost($event->getPlayer());
+            }
+        }
+    }
 
+
+    /**
+     * Spawns a ghost
+     *
+     * @param Player $p
+     * @return void
+     */
     public function spawnGhost(Player $p){
         // Getting the skin
         $nbtSkin = new NBT(NBT::BIG_ENDIAN);
