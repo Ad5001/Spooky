@@ -159,7 +159,6 @@ class Ghost extends Human {
 	public function movePlayerRandomly(){
 		if(!$this->checkIfConnected()) return;
 		if(rand(0,20) == 1) {
-			echo "\nMove ya!\n";
 			$this->associatedPlayer->teleport(new Vector3($this->associatedPlayer->x + rand(0, 3) - rand(0, 3), $this->associatedPlayer->y, $this->associatedPlayer->z + rand(0, 3) - rand(0, 3)));
 		}
 	}
