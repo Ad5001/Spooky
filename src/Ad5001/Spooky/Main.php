@@ -5,15 +5,20 @@ use pocketmine\command\Command;
 use pocketmine\plugin\PluginBase;
 use pocketmine\Server;
 use pocketmine\Player;
+use pocketmine\entity\Entity;
 use pocketmine\event\Listener;
 use pocketmine\item\enchantment\Enchantment;
 use pocketmine\event\block\BlockPlaceEvent;
+use pocketmine\network\mcpe\protocol\PlaySoundPacket;
 use pocketmine\block\Block;
+use pocketmine\resourcepacks\ZippedResourcePack;
 
 use pocketmine\nbt\tag\ListTag;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\nbt\tag\FloatTag;
+use pocketmine\nbt\tag\DoubleTag;
+use pocketmine\nbt\tag\ShortTag;
 use pocketmine\nbt\NBT;
 
 
@@ -33,8 +38,30 @@ class Main extends PluginBase implements Listener{
     public function onEnable(){
         // Registering some enchants
         Enchantment::registerEnchantment(new Enchantment(Enchantment::SHARPNESS, "%enchantment.attack.sharpness", Enchantment::ACTIVATION_HELD, Enchantment::RARITY_COMMON, Enchantment::SLOT_SWORD));
+        Entity::registerEntity(Ghost::class, true, ['Ghost', 'minecraft:ghost']);
         $this->getServer()->getScheduler()->scheduleRepeatingTask(new TickTask($this), 2);
         $this->getServer()->getPluginManager()->registerEvents($this, $this);
+        // Resource pack
+        $this->saveResource("Spooky.mcpack");
+        $pack = new ZippedResourcePack($this->getDataFolder() . "Spooky.mcpack");
+        $r = new \ReflectionClass("pocketmine\\resourcepacks\\ResourcePackManager");
+        if($pack instanceof \pocketmine\resourcepacks\ResourcePack){
+            // Reflection because devs thought it was a great idea to not let plugins manage resource packs :/
+            $resourcePacks = $r->getProperty("resourcePacks");
+            $resourcePacks->setAccessible(true);
+            $rps = $resourcePacks->getValue($this->getServer()->getResourceManager());
+            $rps[] = $pack;
+            $resourcePacks->setValue($this->getServer()->getResourceManager(), $rps);
+            $resourceUuids = $r->getProperty("uuidList");
+            $resourceUuids->setAccessible(true);
+            $uuids = $resourceUuids->getValue($this->getServer()->getResourceManager());
+            $uuids[$pack->getPackId()] = $pack;
+            $resourceUuids->setValue($this->getServer()->getResourceManager(), $uuids);
+            // Forcing resource packs. We want the client to hear the music!
+            $forceResources = $r->getProperty("serverForceResources");
+            $forceResources->setAccessible(true);
+            $forceResources->setValue($this->getServer()->getResourceManager(), true);
+        }
     }
 
     /**
@@ -63,7 +90,7 @@ class Main extends PluginBase implements Listener{
             $under->y--;
             // Hay bale for the body
             if($event->getBlock()->getLevel()->getBlock($under)->getId() == Block::HAY_BALE) {
-                $under2 = $event->getBlock()->asVector3();
+                $under2 = $under->asVector3();
                 $under2->y--;
                 // Fence for the bottom
                 if($event->getBlock()->getLevel()->getBlock($under2)->getId() == Block::FENCE){
@@ -93,8 +120,16 @@ class Main extends PluginBase implements Listener{
             $event->getBlock()->getLevel()->setBlock($under2, Block::get(Block::AIR));
             $event->getBlock()->getLevel()->setBlock($side1, Block::get(Block::AIR));
             $event->getBlock()->getLevel()->setBlock($side2, Block::get(Block::AIR));
-            if($event->getPlayer()){
+            if($event->getPlayer() !== null){
                 $this->spawnGhost($event->getPlayer());
+                // Spawning an another ghost for the surround players. It's more challenging :p
+                foreach($this->getServer()->getOnlinePlayers() as $p) {
+                    if($p->getLevel()->getName() == $event->getPlayer()->getLevel()->getName() && $p->getName() !== $event->getPlayer()->getName()) {
+                        if($p->distance($event->getPlayer()) <= 10) {
+                            $this->spawnGhost($p);
+                        }
+                    }
+                }
             }
         }
     }
@@ -109,12 +144,12 @@ class Main extends PluginBase implements Listener{
     public function spawnGhost(Player $p){
         // Getting the skin
         $nbtSkin = new NBT(NBT::BIG_ENDIAN);
-        $nbtSkin->readCompressed(fread($this->getResource("ghost_player_data.dat")));
+        $nbtSkin->readCompressed(file_get_contents($this->getFile() . "resources/ghost_player_data.dat"));
 		$nbt = new CompoundTag();
 		$nbt->Pos = new ListTag("Pos", [
-			new DoubleTag("", $player->getX()),
-			new DoubleTag("", $player->getY()),
-			new DoubleTag("", $player->getZ())
+			new DoubleTag("", $p->getX()),
+			new DoubleTag("", $p->getY()),
+			new DoubleTag("", $p->getZ())
 		]);
 		$nbt->Motion = new ListTag("Motion", [
 			new DoubleTag("", 0),
@@ -122,15 +157,35 @@ class Main extends PluginBase implements Listener{
 			new DoubleTag("", 0)
 		]);
 		$nbt->Rotation = new ListTag("Rotation", [
-			new FloatTag("", $player->getYaw()),
-			new FloatTag("", $player->getPitch())
-		]);
+			new FloatTag("", $p->getYaw()),
+			new FloatTag("", $p->getPitch())
+        ]);
+        // var_dump($nbtSkin);
 		$nbt->Health = new ShortTag("Health", 20);
-        $player->saveNBT();
-        $nbt->Skin = clone $nbtSkin->Skin;
-        $nbt->Inventory = clone $nbtSkin->Inventory;
-        $g = new Ghost($p->getLevel(), $nbt);
+        $nbt->Skin = clone $nbtSkin->getData()->Skin;
+        $nbt->Inventory = clone $nbtSkin->getData()->Inventory;
+        $g = Entity::createEntity("Ghost", $p->getLevel(), $nbt);
         $g->startFight($p);
         $this->ghosts[$p->getName()] = $g;
+    }
+
+
+
+    public function onEntityDamage(\pocketmine\event\entity\EntityDamageEvent $event){
+        if($event instanceof \pocketmine\event\entity\EntityDamageByEntityEvent && $event->getDamager() instanceof Player){
+            if(isset($event->getDamager()->getInventory()->getItemInHand()->getNamedTag()->customDamage)) {
+                $event->setDamage($event->getDamager()->getInventory()->getItemInHand()->namedtag->customDamage->getValue());
+            }
+            if(isset($event->getDamager()->getInventory()->getItemInHand()->getNamedTag()->sneakInvisible) && $event->getEntity() instanceof Player) {
+		        $pk = new PlaySoundPacket();
+                $pk->soundName = "mob.wither.death";
+                $pk->x = (int)$event->getEntity()->x;
+                $pk->y = (int)$event->getEntity()->y;
+                $pk->z = (int)$event->getEntity()->z;
+                $pk->volume = 3;
+                $pk->pitch = 1;
+                $event->getEntity()->dataPacket($pk);
+            }
+        }
     }
 }

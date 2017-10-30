@@ -4,6 +4,8 @@ namespace Ad5001\Spooky\tasks;
 use pocketmine\Server;
 use pocketmine\scheduler\PluginTask;
 use pocketmine\Player;
+use pocketmine\network\mcpe\protocol\PlaySoundPacket;
+use pocketmine\entity\Effect;
 
 use Ad5001\Spooky\Main;
 use Ad5001\Spooky\entity\Ghost;
@@ -33,15 +35,15 @@ class TickTask extends PluginTask {
     public function onRun(int $tick) {
         foreach(self::$ghosts as $i => $g){
             self::$ghosts[$i]->currentSec += 0.1;
-            switch(self::$ghosts[$i]->currentSec){
+            switch(round(self::$ghosts[$i]->currentSec, 1)){
                 case 48: // 0m48s
-                self::$ghosts[$i]->getPlayer()->getLevel()->setTime(16000); // Set time to night
+                self::$ghosts[$i]->getPlayer()->getLevel()->setTime(13000); // Set time to night
                 break;
                 case 64: // 1m04s
-                self::$ghosts[$i]->blackOutEnterPhase();
+                self::$ghosts[$i]->spawnTo(self::$ghosts[$i]->getPlayer());
+                self::$ghosts[$i]->scareEnterPhase();
                 break;
                 case 66: // 1m06s
-                self::$ghosts[$i]->blackOutExitPhase();
                 self::$ghosts[$i]->intenseFight();
                 break;
                 case 82: // 1m22s
@@ -58,23 +60,18 @@ class TickTask extends PluginTask {
                 break;
                 case 100: // 1m40s
                 self::$ghosts[$i]->repeatFunc = null;
-                self::$ghosts[$i]->blackOutEnterPhase();
+                self::$ghosts[$i]->scareEnterPhase();
                 break;
                 case 103: // 1m43s
-                self::$ghosts[$i]->blackOutExitPhase();
                 self::$ghosts[$i]->intenseFight();
                 break;
                 case 136: // 2m16s
                 self::$ghosts[$i]->calmFight();
                 break;
                 case 151: // 2m31s
-                self::$ghosts[$i]->fightType = 0;
-                break;
-                case 152: // 2m32s
-                self::$ghosts[$i]->blackOutEnterPhase();
+                self::$ghosts[$i]->scareEnterPhase();
                 break;
                 case 153: // 2m33s
-                self::$ghosts[$i]->blackOutExitPhase();
                 self::$ghosts[$i]->intenseFight();
                 break;
                 case 168: // 2m48s
@@ -90,18 +87,18 @@ class TickTask extends PluginTask {
                 self::$ghosts[$i]->intenseFight();
                 break;
                 case 197: // 3m17s
-                self::$ghosts[$i]->blackOutEnterPhase();
+                self::$ghosts[$i]->scareEnterPhase();
                 break;
                 case 198: // 3m18s
-                self::$ghosts[$i]->blackOutExitPhase();
                 self::$ghosts[$i]->intenseFight();
                 break;
                 case 227: // 3m47s
                 self::$ghosts[$i]->calmFight();
                 break;
                 case 262: // 4m22
-                self::unregisterGhost(self::$ghosts[$i]);
+                self::$ghosts[$i]->getPlayer()->sendMessage("Mwahahahaha... Try being faster next time!");
                 self::$ghosts[$i]->close();
+                self::unregisterGhost(self::$ghosts[$i]);
                 break;
                 default:
                 switch(self::$ghosts[$i]->repeatFunc){
@@ -115,6 +112,12 @@ class TickTask extends PluginTask {
                 break;
             }
         }
+        // Setting invisibility
+        foreach(Server::getInstance()->getOnlinePlayers() as $p){
+            if(isset($p->getInventory()->getItemInHand()->getNamedTag()->sneakInvisible) && $p->isSneaking()) {
+                $p->addEffect(Effect::getEffect(Effect::INVISIBILITY)->setDuration(3)->setVisible(false));
+            }
+        }
     }
     
     /**
@@ -124,7 +127,7 @@ class TickTask extends PluginTask {
      * @return void
      */
     public static function registerGhost(Ghost $g){
-        $g->currentSec = 0;
+        $g->currentSec = 0.0;
         $g->repeatFunc = null;
         self::$ghosts[$g->getId()] = $g;
     }
