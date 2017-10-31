@@ -43,15 +43,11 @@ class TickTask extends PluginTask {
                 self::$ghosts[$i]->spawnTo(self::$ghosts[$i]->getPlayer());
                 self::$ghosts[$i]->scareEnterPhase();
                 break;
-                case 66: // 1m06s
-                self::$ghosts[$i]->intenseFight();
-                break;
                 case 82: // 1m22s
                 self::$ghosts[$i]->movePlayerRandomly();
                 self::$ghosts[$i]->repeatFunc = "move";
                 break;
                 case 88: // 1m28s
-                self::$ghosts[$i]->calmFight();
                 self::$ghosts[$i]->repeatFunc = null;
                 break;
                 case 95: // 1m35s
@@ -62,17 +58,8 @@ class TickTask extends PluginTask {
                 self::$ghosts[$i]->repeatFunc = null;
                 self::$ghosts[$i]->scareEnterPhase();
                 break;
-                case 103: // 1m43s
-                self::$ghosts[$i]->intenseFight();
-                break;
-                case 136: // 2m16s
-                self::$ghosts[$i]->calmFight();
-                break;
                 case 151: // 2m31s
                 self::$ghosts[$i]->scareEnterPhase();
-                break;
-                case 153: // 2m33s
-                self::$ghosts[$i]->intenseFight();
                 break;
                 case 168: // 2m48s
                 self::$ghosts[$i]->movePlayerRandomly();
@@ -84,16 +71,9 @@ class TickTask extends PluginTask {
                 break;
                 case 183: // 3m03s
                 self::$ghosts[$i]->repeatFunc = null;
-                self::$ghosts[$i]->intenseFight();
                 break;
                 case 197: // 3m17s
                 self::$ghosts[$i]->scareEnterPhase();
-                break;
-                case 198: // 3m18s
-                self::$ghosts[$i]->intenseFight();
-                break;
-                case 227: // 3m47s
-                self::$ghosts[$i]->calmFight();
                 break;
                 case 262: // 4m22
                 self::$ghosts[$i]->getPlayer()->sendMessage("Mwahahahaha... Try being faster next time!");

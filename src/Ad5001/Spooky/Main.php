@@ -48,7 +48,7 @@ class Main extends PluginBase implements Listener{
         if(!file_exists($this->getDataFolder() . "Spooky.mcpack")) {
             $downRP = true;
             echo TextFormat::toANSI("§f[Spooky] ⚪ Downloading resource pack...");
-            file_put_contents($this->getDataFolder() . "Spooky.mcpack", Utils::getURL("https://download.ad5001.eu/other/Spooky/Spooky.mcpack"));
+            file_put_contents($this->getDataFolder() . "Spooky.mcpack", Utils::getURL("https://github.com/Ad5001/Spooky/releases/download/1.0/Spooky.mcpack"));
         }
         echo str_repeat("\010", $downRP ? strlen(TextFormat::toANSI("§f[Spooky] ⚪ Downloading resource pack...")) : 0) . TextFormat::toANSI("§f[Spooky] ⚪ Applying resource pack...   "); // Replacing latest message
         $pack = new ZippedResourcePack($this->getDataFolder() . "Spooky.mcpack");

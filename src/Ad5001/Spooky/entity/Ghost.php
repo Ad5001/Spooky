@@ -105,25 +105,6 @@ class Ghost extends Human {
 	}
 	
 	/**
-	 * Starts a sequence where the ghost is in an intense fight.
-	 *
-	 * @return void
-	 */
-	public function intenseFight(){
-		if(!$this->checkIfConnected()) return;
-		// TODO: Custom intense fight
-	}
-
-	/**
-	 * Starts a sequence where the ghost is in an calm fight.
-	 *
-	 * @return void
-	 */
-	public function calmFight(){
-		if(!$this->checkIfConnected()) return;
-	}
-	
-	/**
 	 * Starts a sequence where the ghost blinds the player,
 	 * slows him down (zooming effect w/ fov) and he appears invuulnerable 
 	 * in front of the player.
