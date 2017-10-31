@@ -1,7 +1,7 @@
 ---
 name: Spooky
 author:  Ad5001
-version: 1.0
+version: 1.0.1
 api: [3.0.0-ALPHA9]
 main: Ad5001\Spooky\Main
 commands: []

@@ -430,7 +430,7 @@ class Ghost extends Human {
 		$pk->headYaw = $this->yaw;
 		$pk->pitch = $this->pitch;
 		$this->getPlayer()->dataPacket($pk);
-		$this->getPlayer()->sendPopup("He's " . ($this->x - $this->getPlayer()->x) . ", " . ($this->y - $this->getPlayer()->y) . ", " . ($this->z - $this->getPlayer()->z) . " blocks away");
+		$this->getPlayer()->sendPopup("He's " . round($this->x - $this->getPlayer()->x, 1) . ", " . round($this->y - $this->getPlayer()->y, 1) . ", " . round($this->z - $this->getPlayer()->z, 1) . " blocks away");
 	}
 
 

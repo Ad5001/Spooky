@@ -4,4 +4,5 @@ branches:
 projects:
   Spooky:
     path: ""
+    icon: "icon.png"
 ...
