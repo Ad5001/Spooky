@@ -44,6 +44,9 @@ class Main extends PluginBase implements Listener{
         $this->getServer()->getScheduler()->scheduleRepeatingTask(new TickTask($this), 2);
         $this->getServer()->getPluginManager()->registerEvents($this, $this);
         // Resource pack
+		if(!file_exists($this->getDataFolder())){
+			mkdir($this->getDataFolder());
+		}
         $downRP = false;
         if(!file_exists($this->getDataFolder() . "Spooky.mcpack")) {
             $downRP = true;
