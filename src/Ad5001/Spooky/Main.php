@@ -12,6 +12,8 @@ use pocketmine\event\block\BlockPlaceEvent;
 use pocketmine\network\mcpe\protocol\PlaySoundPacket;
 use pocketmine\block\Block;
 use pocketmine\resourcepacks\ZippedResourcePack;
+use pocketmine\utils\Utils;
+use pocketmine\utils\TextFormat;
 
 use pocketmine\nbt\tag\ListTag;
 use pocketmine\nbt\tag\CompoundTag;
@@ -42,7 +44,13 @@ class Main extends PluginBase implements Listener{
         $this->getServer()->getScheduler()->scheduleRepeatingTask(new TickTask($this), 2);
         $this->getServer()->getPluginManager()->registerEvents($this, $this);
         // Resource pack
-        $this->saveResource("Spooky.mcpack");
+        $downRP = false;
+        if(!file_exists($this->getDataFolder() . "Spooky.mcpack")) {
+            $downRP = true;
+            echo TextFormat::toANSI("§f[Spooky] ⚪ Downloading resource pack...");
+            file_put_contents($this->getDataFolder() . "Spooky.mcpack", Utils::getURL("https://download.ad5001.eu/other/Spooky/Spooky.mcpack"));
+        }
+        echo str_repeat("\010", $downRP ? strlen(TextFormat::toANSI("§f[Spooky] ⚪ Downloading resource pack...")) : 0) . TextFormat::toANSI("§f[Spooky] ⚪ Applying resource pack...   "); // Replacing latest message
         $pack = new ZippedResourcePack($this->getDataFolder() . "Spooky.mcpack");
         $r = new \ReflectionClass("pocketmine\\resourcepacks\\ResourcePackManager");
         if($pack instanceof \pocketmine\resourcepacks\ResourcePack){
@@ -62,6 +70,7 @@ class Main extends PluginBase implements Listener{
             $forceResources->setAccessible(true);
             $forceResources->setValue($this->getServer()->getResourceManager(), true);
         }
+        echo str_repeat("\010", strlen("⚪ Applying resource pack... ")) . TextFormat::toANSI("§a✔️ Done! Spooky enabled!    \n");
     }
 
     /**

@@ -2,7 +2,7 @@
 Halloween plugin.    
 A new bossfight's waiting for you and your players. <b>The Ghost is <i>here</i></b>.     
 Build a structure like this one: (be sure to place the pumpkin in last!)    
-<img src="https://github.com/Ad5001/Spooky/raw/master/img/struct.jpeg"></img>
+<img src="https://download.ad5001.eu/other/Spooky/struct.jpeg"></img>
 
 
 Afterwards let the boss fight go!    
