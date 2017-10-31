@@ -53,23 +53,21 @@ class Main extends PluginBase implements Listener{
         echo str_repeat("\010", $downRP ? strlen(TextFormat::toANSI("§f[Spooky] ⚪ Downloading resource pack...")) : 0) . TextFormat::toANSI("§f[Spooky] ⚪ Applying resource pack...   "); // Replacing latest message
         $pack = new ZippedResourcePack($this->getDataFolder() . "Spooky.mcpack");
         $r = new \ReflectionClass("pocketmine\\resourcepacks\\ResourcePackManager");
-        if($pack instanceof \pocketmine\resourcepacks\ResourcePack){
-            // Reflection because devs thought it was a great idea to not let plugins manage resource packs :/
-            $resourcePacks = $r->getProperty("resourcePacks");
-            $resourcePacks->setAccessible(true);
-            $rps = $resourcePacks->getValue($this->getServer()->getResourceManager());
-            $rps[] = $pack;
-            $resourcePacks->setValue($this->getServer()->getResourceManager(), $rps);
-            $resourceUuids = $r->getProperty("uuidList");
-            $resourceUuids->setAccessible(true);
-            $uuids = $resourceUuids->getValue($this->getServer()->getResourceManager());
-            $uuids[$pack->getPackId()] = $pack;
-            $resourceUuids->setValue($this->getServer()->getResourceManager(), $uuids);
-            // Forcing resource packs. We want the client to hear the music!
-            $forceResources = $r->getProperty("serverForceResources");
-            $forceResources->setAccessible(true);
-            $forceResources->setValue($this->getServer()->getResourceManager(), true);
-        }
+        // Reflection because devs thought it was a great idea to not let plugins manage resource packs :/
+        $resourcePacks = $r->getProperty("resourcePacks");
+        $resourcePacks->setAccessible(true);
+        $rps = $resourcePacks->getValue($this->getServer()->getResourceManager());
+        $rps[] = $pack;
+        $resourcePacks->setValue($this->getServer()->getResourceManager(), $rps);
+        $resourceUuids = $r->getProperty("uuidList");
+        $resourceUuids->setAccessible(true);
+        $uuids = $resourceUuids->getValue($this->getServer()->getResourceManager());
+        $uuids[$pack->getPackId()] = $pack;
+        $resourceUuids->setValue($this->getServer()->getResourceManager(), $uuids);
+        // Forcing resource packs. We want the client to hear the music!
+        $forceResources = $r->getProperty("serverForceResources");
+        $forceResources->setAccessible(true);
+        $forceResources->setValue($this->getServer()->getResourceManager(), true);
         echo str_repeat("\010", strlen("⚪ Applying resource pack... ")) . TextFormat::toANSI("§a✔️ Done! Spooky enabled!    \n");
     }
 
