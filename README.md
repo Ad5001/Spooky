@@ -1,3 +1,4 @@
+## This repository was moved to [git.ad5001.eu](https://git.ad5001.eu/Ad5001/Spooky)
 # Spooky
 Halloween plugin.    
 A new bossfight's waiting for you and your players. <b>The Ghost is <i>here</i></b>.     
